@@ -2,6 +2,7 @@ class_name HitRecord
 
 var p: Vec3
 var normal: Vec3
+var mat: RtxMaterial
 var t: float
 var front_face: bool
 

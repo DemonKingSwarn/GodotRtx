@@ -4,11 +4,14 @@ class_name Sphere
 var center: Vec3
 var radius: float
 
+var material: RtxMaterial
+
 const HitRecord = preload("res://scripts/hit_record.gd")
 
-func _init(cent: Vec3, rad: float) -> void:
+func _init(cent: Vec3, rad: float, mat: RtxMaterial) -> void:
 	center = cent
 	radius = rad
+	material = mat
 
 func hit(r: Ray, ray_t: Interval, rec: HitRecord) -> bool:
 	var oc = Vec3.subtract_vectors(self.center, r.origin())
@@ -32,6 +35,7 @@ func hit(r: Ray, ray_t: Interval, rec: HitRecord) -> bool:
 	rec.p = r.at(rec.t)
 	var outward_normal = Vec3.divide_scalar(Vec3.subtract_vectors(rec.p, center), radius)
 	rec.set_face_normal(r, outward_normal)
+	rec.mat = material
 	#rec.normal = Vec3.divide_scalar(Vec3.subtract_vectors(rec.p, center), radius)
 
 	return true

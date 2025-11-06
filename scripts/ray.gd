@@ -7,7 +7,7 @@ var dir: Vec3
 
 func _init(origin: Vec3 = null, direction: Vec3 = null) -> void:
 	orig = origin if origin != null else Vec3.new()
-	dir = direction
+	dir = direction if direction != null else Vec3.new()
 
 func origin() -> Vec3:
 	return orig

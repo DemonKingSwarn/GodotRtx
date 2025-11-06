@@ -69,3 +69,40 @@ static func unit_vector(v: Vec3) -> Vec3:
 	if length == 0:
 		return Vec3.new()
 	return divide_scalar(v, length)
+
+static func random_unit_vector() -> Vec3:
+	while(true):
+		var p = random_min_max(-1.0, 1.0)
+		var lensq = p.length_squared()
+		if (1e-160 < lensq) and (lensq <= 1.0):
+			return divide_scalar(p, sqrt(p.length_squared()))
+
+	return Vec3.new()
+
+static func random() -> Vec3:
+	return Vec3.new(
+		Constants.random_double(),
+		Constants.random_double(),
+		Constants.random_double()
+	)
+
+static func random_min_max(min: float, max: float) -> Vec3:
+	return Vec3.new(
+		randf_range(min, max),
+		randf_range(min, max),
+		randf_range(min, max)
+	)
+
+static func random_on_hemisphere(normal: Vec3) -> Vec3:
+	var on_unit_sphere = random_unit_vector()
+	if Vec3.dot(on_unit_sphere, normal) > 0.0:
+		return on_unit_sphere
+	else:
+		return on_unit_sphere.negate()
+
+func near_zero() -> bool:
+	var s = 1e-8
+	return (abs(e[0]) < s) and (abs(e[1]) < s) and (abs(e[2]) < s)
+
+static func reflect(v: Vec3, n: Vec3) -> Vec3:
+	return Vec3.subtract_vectors(v, Vec3.multiply_scalar(2.0 * Vec3.dot(v, n), n))

@@ -4,6 +4,7 @@ var image_width: int
 var image_height: int
 var aspect_ratio: float
 var samples_per_pixel: int = 10
+var max_depth: int = 10
 
 var pixel_samples_scale
 
@@ -52,19 +53,9 @@ func render(world: HittableList) -> void:
 				if s == 0 and i == 0 and j == 0:
 					print("First sample at pixel (0,0)")
 				var r: Ray = get_ray(i, j, pixel00_loc, pixel_delta_u, pixel_delta_v, center)
-				pixel_color = add_vectors(pixel_color, ray_color(r, world))
+				pixel_color = add_vectors(pixel_color, ray_color(r, max_depth, world))
 			
 			pixel_color = multiply_scalar(1.0 / samples_per_pixel, pixel_color)
-
-			#var first_term = Vec3.multiply_scalar(float(i), pixel_delta_u)
-			#var second_term = Vec3.multiply_scalar(float(j), pixel_delta_v)
-			#var sum_terms = Vec3.add_vectors(first_term, second_term)
-			#var pixel_center = Vec3.add_vectors(pixel00_loc, sum_terms)
-			#
-			#var ray_direction = Vec3.subtract_vectors(pixel_center, center)
-			#var r: Ray = Ray.new(center, ray_direction)
-			#
-			#var pixel_color := ray_color(r, world)
 		
 			var color_string = pixel_color.write_color()
 			file.store_line(color_string)
@@ -77,17 +68,20 @@ static func multiply_scalar(t: float, v: RtxColor) -> RtxColor:
 static func add_vectors(u: RtxColor, v: RtxColor) -> RtxColor:
 	return RtxColor.new(u.e[0] + v.e[0], u.e[1] + v.e[1], u.e[2] + v.e[2])
 
-func ray_color(r: Ray, world: Hittable) -> RtxColor:
+func ray_color(ray: Ray, depth: int, world: Hittable) -> RtxColor:
+	if depth <= 0:
+		return RtxColor.new(0, 0, 0)
 	var rec: HitRecord = HitRecord.new()
-	if world.hit(r, Interval.new(0, Constants.infinity), rec):
-		return multiply_scalar(0.5, RtxColor.new(rec.normal.x() + 1, rec.normal.y() + 1, rec.normal.z() + 1))
-
-	var unit_direction: Vec3 = Vec3.unit_vector(r.direction())
-	var a = 1.0 - 0.5 * (unit_direction.y() + 1.0)
-	
-	var c1 = multiply_scalar(1.0 - a, RtxColor.new(1.0, 1.0, 1.0))
-	var c2 = multiply_scalar(a, RtxColor.new(0.5, 0.7, 1.0))
-	return add_vectors(c1, c2)
+	if world.hit(ray, Interval.new(0.001, Constants.infinity), rec):
+		var scattered: Ray = Ray.new()
+		var attenuation: RtxColor = RtxColor.new()
+		if rec.mat.scatter(ray, rec, attenuation, scattered):
+			var new_color = ray_color(scattered, depth - 1, world)
+			return RtxColor.multiply_vectors(attenuation, new_color)
+		return RtxColor.new(0, 0, 0)
+	var unit_direction = Vec3.unit_vector(ray.direction())
+	var a = 0.5 * (unit_direction.y() + 1.0)
+	return RtxColor.new((1.0 - a) + a * 0.5, (1.0 - a) + a * 0.7, 1.0)
 
 func sample_square() -> Vec3:
 	var rand_x = Constants.random_double()

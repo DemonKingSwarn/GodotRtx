@@ -28,5 +28,6 @@ func hit(r: Ray, ray_t: Interval, rec: HitRecord) -> bool:
 			rec.p = temp_rec.p
 			rec.normal = temp_rec.normal
 			rec.front_face = temp_rec.front_face
+			rec.mat = temp_rec.mat
 
 	return hit_anything
