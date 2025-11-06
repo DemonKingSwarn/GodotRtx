@@ -16,7 +16,7 @@ func write_color() -> String:
 	#var gbyte := int(255.999 * g)
 	#var bbyte := int(255.999 * b)
 
-	var intensity : Interval = Interval.new(0.0, 1.0)
+	var intensity : Interval = Interval.new(0.000, 0.999)
 	var rbyte := int(256 * intensity.clamp(r))
 	var gbyte := int(256 * intensity.clamp(g))
 	var bbyte := int(256 * intensity.clamp(b))
